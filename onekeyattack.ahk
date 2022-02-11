@@ -51,8 +51,13 @@ Apath:="*70 " A_LoopFilePath
 if ImageSearch(&FoundX, &FoundY, 30, 754, 58, 775, Apath)
 {
 SplitPath A_LoopFileName ,,,, &name_no_ext
+if InStr(name_no_ext,"^",0,1) or InStr(name_no_ext,"!",0,1) or InStr(name_no_ext,"+",0,1)
+{
+Akey := name_no_ext
+}
+else
 Akey:="{" name_no_ext "}"
-ControlSend Akey ,,"魔兽世界"
+send Akey
 break
 }
 }
