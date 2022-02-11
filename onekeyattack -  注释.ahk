@@ -51,8 +51,13 @@ Apath:="*70 " A_LoopFilePath
 if ImageSearch(&FoundX, &FoundY, 30, 754, 58, 775, Apath) ;截图与屏幕上hekili 给出的技能快捷键对比，找到就按相应的快捷键
 {
 SplitPath A_LoopFileName ,,,, &name_no_ext
+if InStr(name_no_ext,"^",0,1) or InStr(name_no_ext,"!",0,1) or InStr(name_no_ext,"+",0,1) ;组合键判断，如，ctrl(shift,alt)+1，可以用send 命令，截图文件名为^(+,!)1,参考ahk 快捷键规定。
+{
+Akey := name_no_ext
+}
+else
 Akey:="{" name_no_ext "}"
-ControlSend Akey ,,"魔兽世界"    ;如要用组合键，如，ctrl+1，可以用send 命令，截图文件名为^1,参考ahk 快捷键规定。
+send Akey   
 break
 }
 }
