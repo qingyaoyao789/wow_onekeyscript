@@ -17,6 +17,7 @@ return
 startatt:=true
 Loop
 {
+MyGui.show("x638 y65 NoActivate")
 if PixelSearch(&Px, &Py, 31,718,32,719,0xff2d35, 3)   ;是否选中目标，色块位置和色号，自行调节
 {
 if PixelSearch(&Px1, &Py1, 31,732,32,733, 0xfdf433,3) ;是否在施法，色块位置和色号，自行调节
