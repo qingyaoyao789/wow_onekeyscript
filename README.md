@@ -1,14 +1,3 @@
-利用ahk imagesearch 和pixsearch，结合 WA对目标，自身施法状态判断，自动按下hekili给出的快捷键。
+使用ahk v2 beta3 版，制作的hekili自动脚本生成器，其中截图功能使用thqby大神的开源dll， https://github.com/thqby/wincapture 和https://github.com/thqby/ahk2_lib/tree/master/wincapture 
 
-单线程版：ahk v2 beta3 下载地址：https://www.autohotkey.com/download/ahk-v2.zip
-
-         ahk v1 下载地址：https://www.autohotkey.com/download/ahk-install.exe
-
-多线程版：ahkh v1.1.33.10 https://github.com/HotKeyIt/ahkdll-v1-release/archive/master.zip
-         ahkh V2 beta https://github.com/thqby/AutoHotkey_H
-
-原理：先判断是否选中可攻击目标，如无，则判断周边是否有可攻击目标存在，如有，发送tab键选中目标；如有目标，判断角色是否施法（或GCD)中，施法时，识别下一个技能，找到匹配文件，读取文件名，转化为技能快捷键；如无，则send 按键，每个文件读取速度差不多25ms。循环…………  
-
-截图tip：设置hekili，把快捷键位置拉到图标外面，用wa导入背景色块，使用 FSCapture-》捕捉固定大小区域，设置“重复上次捕捉”快捷键，打开自动保存，然后根据hekili提示的起手技能，如XD 月火术，移到动作栏 快捷键 0 处，截图，然后再移动 月火术到 1，按下“重复上传捕捉”快捷键，以此类推，1-2分钟就可以完成技能快捷键截图。
-
-钓鱼脚本,可以试一试.有封号风险,自行判断是否使用.https://github.com/qingyaoyao789/wow_onekeyfish
+使用教程：先设置好hekili界面和快捷键位置，PIC目录复制到 X:\World of Warcraft\_retail_\Interface目录下，导入wa，运行脚本，按脚本左下方 StatusBar提示进行取色，截图等操作，最后一键生成新脚本；按图上字符，修改截图目录下的文件名，匹配按键。热键启动脚本。 
