@@ -7,7 +7,7 @@ global Target_X:=0,Target_Y:=0,Target_Color:=""
 global Cast_X:=0,Cast_Y:=0,Cast_Color:=""
 global Enemy_X:=0,Enemy_Y:=0,Enemy_Color:=""
 global Capture_TLX:=0,Capture_TLY:=0,Capture_BRX:=0,Capture_BRY:=0
-global Capture_num:=0,Capture_Folder
+global Capture_num:=0,Capture_Folder:="",Capture_Fkey:=1,Attack_Window_Pos:="w80 x900 y82 NoActivate"
 
 
 
@@ -29,12 +29,14 @@ MyGui.Add("Text","x+10 vCapture_Folder_Text","截图保存目录：             
 MyGui.Add("Text","x5", "脚本热键：")
 MyGui.Add("Hotkey", "x+10 vChosenHotkey","F1")
 MyGui.Add("Button","x+10 vjiemian","界面预览").OnEvent("Click", Preview_gui)
-MyGui.Add("Button","x5 vCheck_Script_Button" , "检测脚本参数").OnEvent("Click", Check_Script)
+MyGui.Add("Button","x5 vCheck_Script_Button" , "检测脚本参数")
+;.OnEvent("Click", Check_Script)
+MyGui["Check_Script_Button"].Opt("+Disabled")
 MyGui.Add("Button","x+10 vCreat_Script_Button" , "一键生成脚本")
 MyGui["Creat_Script_Button"].Opt("+Disabled")
 global Sbar1:=MyGui.Add("StatusBar","x5 vsBar", "")
 MyGui.OnEvent("Close", ExitApp)
-MyGui.Show("x900 y60 NoActivate")
+MyGui.Show("x900 y60")
 dxcp := wincapture.DXGI()
 
 Target_Posandcolor(ctl,*)
@@ -58,6 +60,7 @@ break
 sleep 50
 }
 ui['SBar'].SetText("目标色块坐标和颜色获取成功")
+Check_Button()
 }
 
 Cast_Posandcolor(ctl,*)
@@ -66,7 +69,7 @@ Check_Game()
 global Cast_X:=0,Cast_Y:=0,Cast_Color:=""
 ui := ctl.Gui
 ui['Cast_Button'].Text := "重置"
-ui['SBar'].SetText("读个施法（炉石），鼠标左键点击施法色块")
+ui['SBar'].SetText("wa触发器选反转显示色块，鼠标左键点击施法色块")
 Loop
 {
 if GetKeyState("LButton")
@@ -81,6 +84,7 @@ break
 sleep 50
 }
 ui['SBar'].SetText("施法色块坐标和颜色获取成功")
+Check_Button()
 }
 
 Enemy_Posandcolor(ctl,*)
@@ -104,6 +108,7 @@ break
 sleep 50
 }
 ui['SBar'].SetText("周边敌人色块坐标和颜色获取成功")
+Check_Button()
 }
 
 OpenFolder(ctl,*)
@@ -114,12 +119,15 @@ MyGui.Opt("+OwnDialogs")
 if (Capture_Folder := DirSelect())
 	ui['Capture_Folder_Text'].Text := Capture_Folder
         ;, ui['Start'].Enabled := true
+Check_Button()
+ui['SBar'].SetText("请把提示技能放 0 键上，按F12 开始截图，以此类推") 
 }
 
 CapturePic(ctl,*)
 {
 Check_Game()
 global Capture_TLX:=0,Capture_TLY:=0,Capture_BRX:=0,Capture_BRY:=0
+global Capture_Folder
 ui := ctl.Gui
 ui['SBar'].SetText("鼠标左键点击要截图区域的左上角")
 Loop
@@ -148,6 +156,7 @@ break
 sleep 50
 }
 ui['Capture_Text'].Text:="左上角X=" Capture_TLX "   左上角Y=" Capture_TLY "    右下角X=" Capture_BRX "    右下角Y=" Capture_BRY
+Check_Button()
 }
 
 Check_Script(ctl,*)
@@ -199,10 +208,12 @@ MyGui["Creat_Script_Button"].Opt("-Disabled")
 MyGui["Creat_Script_Button"].OnEvent("Click", Creat_Script)
 }
 }
+
 F12::
 {
+global Capture_Folder
 Check_Game()
-global Capture_num
+global Capture_num,Capture_Fkey
 global Capture_TLX,Capture_TLY,Capture_BRX,Capture_BRY
 if NOT IsSpace(Capture_Folder)
 {
@@ -211,7 +222,13 @@ box := Buffer(16,0)
 ; capture range
 NumPut("uint", Capture_TLX, "uint", Capture_TLY, "uint", Capture_BRX, "uint", Capture_BRY, box)
 ;NumPut("uint", 600, "uint", 600, "uint", 670, "uint", 680, box)
+if Capture_num <10
 savepic:=Capture_Folder "\" Capture_num ".png"
+else if Capture_num>= 10
+{
+savepic:=Capture_Folder "\F" Capture_Fkey ".png"
+Capture_Fkey:=Capture_Fkey+1
+}
 ; save to bmp
 try dxcp.captureAndSave(box).save(savepic)
 dxcp.freeBuffer()	; It's not necessary
@@ -223,6 +240,7 @@ else
 msgbox "截图目录未选择"
 return
 }
+Check_Button()
 }
 
 Check_Game()
@@ -234,6 +252,18 @@ else
     msgbox "游戏未启动"
     return
 }
+}
+
+Check_Button()
+{
+global Target_X,Cast_Y,Enemy_Color,Capture_BRX,Capture_num  
+global Capture_Folder
+if ( Target_X>0 && Cast_Y>0 && (NOT Enemy_Color="") && Capture_BRX>0 && (NOT Capture_Folder="") && Capture_num>1)
+{
+MyGui["Check_Script_Button"].Opt("-Disabled")
+MyGui["Check_Script_Button"].OnEvent("Click", Check_Script)
+}
+
 }
 
 Check_Pic()
@@ -262,16 +292,20 @@ return false
 
 Preview_gui(*)
 {
+    global Attack_Window_Pos
+    new_window_x:=0,new_window_y:=0
     _Preview := Gui("+owner" MyGui.Hwnd)  ; 让主窗口成为 "about box" 的父窗口.
     MyGui.Opt("+Disabled")  ; 禁用主窗口.
     MyGui.Hide()
     _Preview.Opt("+AlwaysOnTop -SysMenu") 
-    _Preview.Add("Text",, "Attact")
-    _Preview.Add("Button", "Default", "返回主窗口").OnEvent("Click", _Preview_Close)
-    _Preview.Show("w80 x900 y82 NoActivate")
+    _Preview.Add("Text",, "自行调整窗口")
+    _Preview.Add("Button", "Default", "返回").OnEvent("Click", _Preview_Close)
+    _Preview.Show(Attack_Window_Pos)
 
     _Preview_Close(*)
     {
+        _Preview.GetPos(&new_window_x,&new_window_y)
+        Attack_Window_Pos:="w80 x" new_window_x " y" new_window_y " NoActivate"
         MyGui.Opt("-Disabled")  ; 重新启用主窗口(必须在下一步之前进行).
         MyGui.show()
         _Preview.Destroy()  ; 销毁关于对话框.
@@ -280,6 +314,7 @@ Preview_gui(*)
 
 Creat_Script(ctl,*)
 {
+global Attack_Window_Pos
 ui := ctl.Gui
 if FileExist("Attack_companion.ahk")
     FileDelete "Attack_companion.ahk"
@@ -304,6 +339,7 @@ FileAppend
 "global Enemy_X:=" Enemy_X ", Enemy_Y:=" Enemy_Y ", Enemy_Color:=" Enemy_Color "`r"
 "global Capture_TLX:=" Capture_TLX ",Capture_TLY:=" Capture_TLY ",Capture_BRX:=" Capture_BRX ",Capture_BRY:=" Capture_BRY "`r"
 "global picpath := " '"' Capture_Folder '"' "`r"
+"global Attack_window :=" '"' Attack_Window_Pos '"' "`r"
 ui['ChosenHotkey'].Value '::' "`r"
 ), "Attack_companion.ahk","UTF-8" 
 
@@ -323,7 +359,8 @@ return
 
 startatt:=true
 MyText.Value :="Start"
-MyGui.Show("w80 x900 y82 NoActivate")  
+
+MyGui.Show(Attack_window)
 Loop
 {
 if PixelSearch(&Px, &Py, Target_X,Target_Y,Target_X,Target_Y,Target_Color, 3)  
