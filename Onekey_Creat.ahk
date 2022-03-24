@@ -416,6 +416,7 @@ sleep 100
 }
 if not startatt
 {
+AAkey:=""
 MyGui.Hide()
 break
 }
